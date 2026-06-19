@@ -49,7 +49,7 @@ def embed(text: str) -> list[float]:
         response = requests.post(
             f"{OLLAMA_BASE_URL}/api/embeddings",
             json=payload,
-            timeout=30
+            timeout=120
         )
         response.raise_for_status()
         return response.json()["embedding"]
