@@ -1,7 +1,7 @@
 import os
 import chromadb
 from chromadb.config import Settings
-from src.llm import embed
+from llm import embed
 
 CHROMA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'chroma_db')
 COLLECTION_NAME = "agrisense_knowledge"
