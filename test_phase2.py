@@ -1,3 +1,8 @@
+import sys
+import io
+if sys.platform.startswith('win'):
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
 
 from src.database import get_full_crop_context, search_pests_by_symptom
 print(get_full_crop_context('cassava'))

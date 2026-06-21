@@ -369,3 +369,19 @@ def is_vision_available() -> dict:
         size_mb = os.path.getsize(MODEL_PATH) / (1024*1024)
         return {"available": True, "mode": "onnx", "model_size_mb": round(size_mb, 1)}
     return {"available": True, "mode": "rule_based", "model_size_mb": 0}
+
+
+def classify_leaf_image(image_path: str) -> dict:
+    """
+    Classify a leaf image. Wraps analyze_plant_image to match orchestrator expectations.
+    """
+    res = analyze_plant_image(image_path)
+    if not res or not res.get("success"):
+        return {}
+    return {
+        "label": res["display_name"],
+        "confidence": res["confidence"] / 100.0,
+        "crop": res["crop"],
+        "severity": res["severity"],
+        "vision_context": res["vision_context"]
+    }

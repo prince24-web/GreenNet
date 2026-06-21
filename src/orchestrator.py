@@ -1,5 +1,5 @@
-from llm import chat 
-from rag import search as query_knowledge
+from src.llm import chat 
+from src.rag import search as query_knowledge
 from src.database import (
     get_crop_info,
     get_pest_treatments,
@@ -55,7 +55,7 @@ def handle_query(user_text: str, image_path: str = None) -> dict:
     # Step 2: RAG retrieval from ChromaDB for general agronomic knowledge
     rag_results = query_knowledge(user_text, n_results=3)
     if rag_results:
-        context_blocks.append("[Reference knowledge] " + " | ".join(rag_results))
+        context_blocks.append("[Reference knowledge] " + " | ".join(r["text"] for r in rag_results))
 
     # Step 3: Structured lookups — try to detect crop/price mentions
     # (simple keyword check; can be made smarter later)

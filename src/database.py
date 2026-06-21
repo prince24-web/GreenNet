@@ -149,3 +149,97 @@ def get_full_crop_context(crop_name: str) -> str:
             lines.append(f"  - {p['region']}: ₦{p['price_per_kg_naira']}/kg | ₦{p['price_per_bag_naira']}/bag ({p['trend']}) — {p['market_name']}")
 
     return "\n".join(lines)
+
+
+def get_crop_info(crop_id_or_name) -> dict:
+    """Get general details for a crop by ID or name."""
+    if isinstance(crop_id_or_name, int):
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM crops WHERE id = ?", (crop_id_or_name,))
+        row = cur.fetchone()
+        conn.close()
+        return dict(row) if row else {}
+    else:
+        return get_crop_by_name(crop_id_or_name)
+
+
+def search_pest_by_name(name: str) -> dict:
+    """Look up a pest by name or local name."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT * FROM pests 
+        WHERE LOWER(name) LIKE LOWER(?) 
+           OR LOWER(local_name) LIKE LOWER(?)
+    """, (f"%{name}%", f"%{name}%"))
+    row = cur.fetchone()
+    conn.close()
+    return dict(row) if row else {}
+
+
+def get_pest_treatments(pest_id: int) -> list[dict]:
+    """Get all treatments for a pest by pest ID (alias for get_treatments_for_pest)."""
+    return get_treatments_for_pest(pest_id)
+
+
+def get_market_price(query: str) -> dict:
+    """
+    Search the query for crop and region mentions.
+    Returns the first matching market price as a dict, or {} if none.
+    """
+    # 1. Get all crops to search for their names in the query
+    crops = get_all_crops()
+    matched_crop = None
+    for crop in crops:
+        # Check if crop name or any of the local names are in the query
+        if crop['name'].lower() in query.lower():
+            matched_crop = crop
+            break
+        local_names = [n.strip() for n in crop.get('local_names', '').split(',') if n.strip()]
+        for ln in local_names:
+            if ln.lower() in query.lower():
+                matched_crop = crop
+                break
+                
+    if not matched_crop:
+        return {}
+        
+    # 2. Check if a region is mentioned
+    regions = ["Lagos", "Onitsha", "Ibadan", "Kano", "Abuja", "Kebbi", "Sokoto", "Kaduna"]
+    matched_region = None
+    for r in regions:
+        if r.lower() in query.lower():
+            matched_region = r
+            break
+            
+    # 3. Query market prices
+    conn = get_connection()
+    cur = conn.cursor()
+    if matched_region:
+        cur.execute("""
+            SELECT mp.*, c.name as crop_name FROM market_prices mp
+            JOIN crops c ON mp.crop_id = c.id
+            WHERE mp.crop_id = ? AND LOWER(mp.region) = LOWER(?)
+        """, (matched_crop['id'], matched_region))
+    else:
+        # Default to the first region available for that crop
+        cur.execute("""
+            SELECT mp.*, c.name as crop_name FROM market_prices mp
+            JOIN crops c ON mp.crop_id = c.id
+            WHERE mp.crop_id = ?
+            LIMIT 1
+        """, (matched_crop['id'],))
+        
+    row = cur.fetchone()
+    conn.close()
+    
+    if row:
+        r = dict(row)
+        return {
+            "crop": r["crop_name"],
+            "region": r["region"],
+            "price_per_kg_naira": r["price_per_kg_naira"],
+            "trend": r["trend"]
+        }
+    return {}

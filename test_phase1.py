@@ -1,5 +1,9 @@
 import sys
+import io
 sys.path.insert(0, '.')
+if sys.platform.startswith('win'):
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
 
 from src.llm import chat, embed, is_ollama_running
 

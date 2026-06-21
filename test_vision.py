@@ -1,5 +1,10 @@
 import sys
+import io
 sys.path.insert(0, '.')
+if sys.platform.startswith('win'):
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
+
 from src.vision import analyze_plant_image, is_vision_available
 from PIL import Image, ImageDraw
 import numpy as np
@@ -35,9 +40,11 @@ print()
 
 # Run analysis on each
 test_images = [
-    ("data/test_images/yellow_leaf.jpg", "Yellow leaf"),
-    ("data/test_images/green_leaf.jpg",  "Green leaf"),
-    ("data/test_images/brown_patch.jpg", "Brown patch"),
+    #("data/test_images/green_leaf.jpg",  "Green leaf"),
+    #("data/test_images/brown_patch.jpg", "Brown patch"),
+    ("data/test_images/content_WhatsApp_Image_2021-05-10_at_5.54.59_AM_(1).jpeg", "Real cassava leaf image"),
+    ("data/test_images/plant_disease_samples/train_sample_0_Soybean___healthy.png", "Soybean healthy"),
+    ("data/test_images/plant_disease_samples/train_sample_4_Tomato___Bacterial_spot.png", "Tomato bacterial spot"),
 ]
 
 for path, label in test_images:
