@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgriSense — Offline Agricultural Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="Style.CSS">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-container">
+          <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 2C6.5 2 2 6.5 2 12c0 3.5 1.8 6.6 4.5 8.4l1.5-1.5C6 17.5 5 14.9 5 12c0-3.9 3.1-7 7-7s7 3.1 7 7c0 2.9-1 5.5-3 6.9l1.5 1.5c2.7-1.8 4.5-4.9 4.5-8.4 0-5.5-4.5-10-10-10z"/>
+            <path d="M12 22V12"/>
+            <path d="M12 12c2.2 0 4-1.8 4-4s-1.8-4-4-4"/>
+          </svg>
+          <span class="logo-text">AgriSense</span>
+        </div>
+        <div class="subtitle">Offline Farm Advisor</div>
+      </div>
+
+      <!-- Connection Status Card -->
+      <div class="status-card" id="status-card">
+        <div class="status-indicator">
+          <span class="status-dot offline" id="status-dot"></span>
+          <span class="status-label" id="status-label">Checking Ollama...</span>
+        </div>
+        <div class="status-details" id="status-details">
+          Locating local model (Qwen2.5:1.5b)
+        </div>
+      </div>
+
+      <!-- Quick Actions / Prompts -->
+      <div class="sidebar-nav">
+        <h3 class="nav-title">Common Farmer Queries</h3>
+        <ul class="nav-links">
+          <li>
+            <button class="suggestion-btn" data-query="My maize leaves have holes and sawdust inside. What should I do?">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21 16-4 4-4-4M17 20V4"/></svg>
+              <span>Holes & sawdust in maize</span>
+            </button>
+          </li>
+          <li>
+            <button class="suggestion-btn" data-query="How much can I sell my tomatoes for in Lagos right now?">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              <span>Tomato price in Lagos</span>
+            </button>
+          </li>
+          <li>
+            <button class="suggestion-btn" data-query="My cassava leaves dey turn yellow with green patches, wetin dey happen?">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/></svg>
+              <span>Yellow spots on cassava (Pidgin)</span>
+            </button>
+          </li>
+          <li>
+            <button class="suggestion-btn" data-query="What is the fertilizer NPK schedule for rice in Ebonyi state?">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg>
+              <span>NPK fertilizer for rice</span>
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <div class="version">v1.2.0 • Offline RAG Enabled</div>
+        <div class="copyright">AgriSense Nigeria</div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="chat-area">
+      <!-- Chat Header -->
+      <header class="chat-header">
+        <div class="header-info">
+          <h2>AgriSense Diagnostic Assistant</h2>
+          <p>Powered by local AI & SQLite Knowledge Base. No internet required.</p>
+        </div>
+        <button class="clear-btn" id="clear-btn" title="Clear Chat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/>
+          </svg>
+          <span>Clear Chat</span>
+        </button>
+      </header>
+
+      <!-- Messages Window -->
+      <div class="messages-container" id="messages-container">
+        <!-- AI Welcome Message -->
+        <div class="message ai">
+          <div class="avatar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2C6.5 2 2 6.5 2 12c0 3.5 1.8 6.6 4.5 8.4l1.5-1.5C6 17.5 5 14.9 5 12c0-3.9 3.1-7 7-7s7 3.1 7 7c0 2.9-1 5.5-3 6.9l1.5 1.5c2.7-1.8 4.5-4.9 4.5-8.4 0-5.5-4.5-10-10-10z"/>
+            </svg>
+          </div>
+          <div class="message-content">
+            <p><strong>Abo! (Welcome!)</strong> I am AgriSense, your local agricultural assistant.</p>
+            <p>I don't need any internet to assist you. You can:</p>
+            <ul>
+              <li>Ask about crop planting guidelines and expected yields.</li>
+              <li>Diagnose crop pests and get immediate treatment options in <strong>Naira (₦)</strong>.</li>
+              <li>Ask about current market prices in regions like Lagos, Kano, Ibadan, or Onitsha.</li>
+              <li><strong>Upload or snap a leaf photo</strong> to automatically diagnose diseases.</li>
+            </ul>
+            <p>How can I help your farm today?</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Stream Status Bar (Only visible during generation) -->
+      <div class="stream-info-bar hidden" id="stream-info-bar">
+        <div class="spinner"></div>
+        <span id="stream-status-text">AgriSense is thinking...</span>
+      </div>
+
+      <!-- Input Area Container -->
+      <div class="input-panel">
+        <!-- Image Preview Area -->
+        <div class="image-preview-container hidden" id="image-preview-container">
+          <div class="preview-wrapper">
+            <img src="" alt="Selected Leaf Preview" id="image-preview">
+            <button class="remove-image-btn" id="remove-image-btn" title="Remove image">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <span class="preview-filename" id="preview-filename">leaf_photo.jpg</span>
+        </div>
+
+        <form class="input-form" id="input-form">
+          <!-- Attachment Button -->
+          <label class="attachment-btn" title="Attach Leaf Photo">
+            <input type="file" id="image-input" accept="image/*">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+          </label>
+
+          <!-- Input Textarea -->
+          <textarea 
+            class="chat-input" 
+            id="chat-input" 
+            rows="1" 
+            placeholder="Ask AgriSense a question, or upload a leaf photo..."
+            required
+          ></textarea>
+
+          <!-- Submit Button -->
+          <button type="submit" class="send-btn" id="send-btn" title="Send message">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="m22 2-7 20-4-9-9-4Z"/>
+              <path d="M22 2 11 13"/>
+            </svg>
+          </button>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <script src="App.JS"></script>
+</body>
+</html>

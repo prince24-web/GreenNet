@@ -1,13 +1,13 @@
 
-from llm import chat 
-from rag import search as query_knowledge
-from database import (
+from .llm import chat 
+from .rag import search as query_knowledge
+from .database import (
     get_crop_info,
     get_pest_treatments,
     get_market_price,
     search_pest_by_name,
 )
-from vision import classify_leaf_image
+from .vision import classify_leaf_image
 
 
 SYSTEM_PROMPT = """You are AgriSense, an offline agricultural assistant for Nigerian smallholder farmers.
@@ -116,7 +116,7 @@ def build_prompt_context(user_text: str, vision_result: dict | None = None) -> s
  
     rag_results = query_knowledge(user_text, n_results=3)
     if rag_results:
-        context_blocks.append("[Reference knowledge] " + " | ".join(rag_results))
+        context_blocks.append("[Reference knowledge] " + " | ".join(r["text"] for r in rag_results))
  
     market_info = get_market_price(user_text)
     if market_info:
