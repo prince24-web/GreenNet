@@ -1,12 +1,13 @@
-from src.llm import chat 
-from src.rag import search as query_knowledge
-from src.database import (
+
+from llm import chat 
+from rag import search as query_knowledge
+from database import (
     get_crop_info,
     get_pest_treatments,
     get_market_price,
     search_pest_by_name,
 )
-from src.vision import classify_leaf_image
+from vision import classify_leaf_image
 
 
 SYSTEM_PROMPT = """You are AgriSense, an offline agricultural assistant for Nigerian smallholder farmers.
@@ -86,3 +87,50 @@ def handle_query(user_text: str, image_path: str = None) -> dict:
         "vision_result": vision_result,
         "had_context": len(context_blocks) > 0,
     }
+
+def build_prompt_context(user_text: str, vision_result: dict | None = None) -> str:
+    """
+    Same retrieval logic as handle_query(), but returns the assembled
+    prompt string instead of calling the LLM — used by app.py so it can
+    stream the response itself instead of waiting for a full reply.
+    """
+    context_blocks = []
+ 
+    if vision_result and vision_result.get("confidence", 0) > 0.3:
+        disease_name = vision_result["label"]
+        confidence = vision_result["confidence"]
+        context_blocks.append(
+            f"[Vision analysis] Detected: {disease_name} (confidence: {confidence:.0%})"
+        )
+ 
+        pest_match = search_pest_by_name(disease_name)
+        if pest_match:
+            treatments = get_pest_treatments(pest_match["id"])
+            if treatments:
+                treatment_text = "; ".join(
+                    f"{t['method']} using {t['product_name']} "
+                    f"({t['dosage']}, ~₦{t['cost_naira']})"
+                    for t in treatments
+                )
+                context_blocks.append(f"[Known treatments] {treatment_text}")
+ 
+    rag_results = query_knowledge(user_text, n_results=3)
+    if rag_results:
+        context_blocks.append("[Reference knowledge] " + " | ".join(rag_results))
+ 
+    market_info = get_market_price(user_text)
+    if market_info:
+        context_blocks.append(
+            f"[Market data] {market_info['crop']} in {market_info['region']}: "
+            f"₦{market_info['price_per_kg_naira']}/kg, trend: {market_info['trend']}"
+        )
+ 
+    if context_blocks:
+        context_str = "\n".join(context_blocks)
+        return (
+            f"Context information:\n{context_str}\n\n"
+            f"Farmer's question: {user_text}\n\n"
+            f"Using the context above where relevant, answer the farmer's question."
+        )
+    return user_text
+ 

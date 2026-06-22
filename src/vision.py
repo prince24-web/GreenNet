@@ -1,6 +1,8 @@
 import os
 import numpy as np
 from PIL import Image
+import base64
+import tempfile
 
 MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'models', 'plant_disease.onnx')
 
@@ -385,3 +387,34 @@ def classify_leaf_image(image_path: str) -> dict:
         "severity": res["severity"],
         "vision_context": res["vision_context"]
     }
+
+
+def classify_leaf_image_from_base64(image_data_url: str) -> dict:
+    """
+    Decodes a base64 image data URL, runs leaf classification on it, and returns the result.
+    """
+    try:
+        # Expected format: "data:image/jpeg;base64,/9j/4AAQSkZJRg..."
+        if "," in image_data_url:
+            header, base64_str = image_data_url.split(",", 1)
+        else:
+            base64_str = image_data_url
+            
+        img_data = base64.b64decode(base64_str)
+        
+        # Save to a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as temp_file:
+            temp_file.write(img_data)
+            temp_path = temp_file.name
+            
+        try:
+            res = classify_leaf_image(temp_path)
+        finally:
+            # clean up temp file
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+                
+        return res
+    except Exception as e:
+        print(f"Error in classify_leaf_image_from_base64: {e}")
+        return {}

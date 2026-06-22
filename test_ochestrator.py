@@ -16,7 +16,7 @@ print("=== Orchestrator Test ===\n")
 #print(f"(had_context: {result['had_context']})\n")
 
 # Test 2: With an image (use a real test image path once Phase 4 model is ready)
-result = handle_query("What's wrong with my cassava?", image_path="data\test_images\content_WhatsApp_Image_2021-05-10_at_5.54.59_AM_(1).jpeg")
+result = handle_query("What's wrong with my cassava?", image_path="data/test_images/content_WhatsApp_Image_2021-05-10_at_5.54.59_AM_(1).jpeg")
 print("Test 2 — with image:")
 print(result["answer"])
 print(f"Vision result: {result['vision_result']}\n")
