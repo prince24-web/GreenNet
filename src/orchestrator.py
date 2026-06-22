@@ -93,16 +93,37 @@ def build_prompt_context(user_text: str, vision_result: dict | None = None) -> s
     Same retrieval logic as handle_query(), but returns the assembled
     prompt string instead of calling the LLM — used by app.py so it can
     stream the response itself instead of waiting for a full reply.
+
+    Performance note: short conversational messages (greetings, thanks, etc.)
+    skip the RAG embedding call entirely to avoid a full nomic-embed-text
+    round-trip on slow CPU-only hardware.
     """
     context_blocks = []
- 
+
+    # ── Short-circuit for conversational messages ─────────────────────────
+    # Farming keywords that always warrant full context retrieval
+    _FARM_KEYWORDS = {
+        "crop", "maize", "cassava", "tomato", "rice", "yam", "soybean",
+        "groundnut", "cowpea", "sorghum", "millet", "pepper", "onion",
+        "fertilizer", "npk", "pest", "disease", "blight", "worm",
+        "treatment", "spray", "price", "market", "sell", "naira", "leaf",
+        "plant", "farm", "harvest", "planting", "soil", "water", "yield",
+        "agbado", "tomati", "ewa", "dawa", "oka", "ise", "rogo",
+    }
+    text_lower = user_text.lower()
+    is_conversational = (
+        len(user_text.strip()) < 40
+        and not any(kw in text_lower for kw in _FARM_KEYWORDS)
+    )
+
+    # ── Vision block (always run if image present) ────────────────────────
     if vision_result and vision_result.get("confidence", 0) > 0.3:
         disease_name = vision_result["label"]
         confidence = vision_result["confidence"]
         context_blocks.append(
             f"[Vision analysis] Detected: {disease_name} (confidence: {confidence:.0%})"
         )
- 
+
         pest_match = search_pest_by_name(disease_name)
         if pest_match:
             treatments = get_pest_treatments(pest_match["id"])
@@ -113,18 +134,21 @@ def build_prompt_context(user_text: str, vision_result: dict | None = None) -> s
                     for t in treatments
                 )
                 context_blocks.append(f"[Known treatments] {treatment_text}")
- 
-    rag_results = query_knowledge(user_text, n_results=3)
-    if rag_results:
-        context_blocks.append("[Reference knowledge] " + " | ".join(r["text"] for r in rag_results))
- 
-    market_info = get_market_price(user_text)
-    if market_info:
-        context_blocks.append(
-            f"[Market data] {market_info['crop']} in {market_info['region']}: "
-            f"₦{market_info['price_per_kg_naira']}/kg, trend: {market_info['trend']}"
-        )
- 
+
+    # ── RAG + DB lookups — skip for greetings/simple chat ────────────────
+    if not is_conversational:
+        rag_results = query_knowledge(user_text, n_results=2)   # 2 instead of 3 — shorter prompt
+        if rag_results:
+            context_blocks.append("[Reference knowledge] " + " | ".join(r["text"] for r in rag_results))
+
+        market_info = get_market_price(user_text)
+        if market_info:
+            context_blocks.append(
+                f"[Market data] {market_info['crop']} in {market_info['region']}: "
+                f"₦{market_info['price_per_kg_naira']}/kg, trend: {market_info['trend']}"
+            )
+
+    # ── Assemble final prompt ─────────────────────────────────────────────
     if context_blocks:
         context_str = "\n".join(context_blocks)
         return (
@@ -133,4 +157,3 @@ def build_prompt_context(user_text: str, vision_result: dict | None = None) -> s
             f"Using the context above where relevant, answer the farmer's question."
         )
     return user_text
- 

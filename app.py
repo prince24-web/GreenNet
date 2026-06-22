@@ -15,7 +15,7 @@ import webview
 import requests
 
 from src.orchestrator import build_prompt_context, SYSTEM_PROMPT
-from src.llm import OLLAMA_BASE_URL, LLM_MODEL, is_ollama_running
+from src.llm import OLLAMA_BASE_URL, LLM_MODEL, is_ollama_running, warmup
 from src.vision import classify_leaf_image_from_base64
 
 
@@ -82,10 +82,11 @@ class Api:
                     {"role": "user", "content": full_prompt},
                 ],
                 "stream": True,
+                "keep_alive": -1,       # Keep model in RAM — prevents cold-start
                 "options": {
                     "temperature": 0.3,
-                    "num_ctx": 2048,
-                    "num_predict": 512,
+                    "num_ctx": 1024,    # Reduced: faster context load on CPU
+                    "num_predict": 300, # Reduced: enough for farming answers
                 },
             }
 
@@ -126,10 +127,16 @@ class Api:
 
 
 def main():
+    # Pre-load both Ollama models in the background so they are warm
+    # before the first user message arrives. This eliminates the 30-60s
+    # cold-start delay on the very first query.
+    warmup_thread = threading.Thread(target=warmup, daemon=True)
+    warmup_thread.start()
+
     api = Api()
     window = webview.create_window(
-        "AgriSense",
-        "ui/index.html",
+        "GreenNet",
+        "ui/Index.HTML",
         js_api=api,
         width=1180,
         height=760,

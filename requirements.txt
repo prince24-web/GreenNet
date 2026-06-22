@@ -1,0 +1,6 @@
+pywebview==6.2.1
+requests==2.34.2
+chromadb==1.5.9
+pillow==12.2.0
+numpy==1.26.4
+onnxruntime==1.27.0
