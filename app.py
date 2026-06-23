@@ -85,10 +85,10 @@ class Api:
                 "keep_alive": -1,       # Keep model in RAM — prevents cold-start
                 "options": {
                     "temperature": 0.3,
-                    "num_ctx": 1024,    # Reduced: faster context load on CPU
+                    "num_ctx": 512,    # Reduced: faster context load on CPU from  1024
                     "num_predict": 300, # Reduced: enough for farming answers
                 },
-            }
+            } 
 
             with requests.post(
                 f"{OLLAMA_BASE_URL}/api/chat",
