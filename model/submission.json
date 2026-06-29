@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0.0",
+  "profiler_version": "adtc-profiler 0.1.0",
+  "submission": {
+    "team_id": "codemonarchs",
+    "domain": "agriculture",
+    "language_scope": [
+      "en"
+    ],
+    "african_alpha_claim": false,
+    "budget_laptop_claim": true,
+    "submitter": {
+      "name": "Wisdom Upeh",
+      "email": "wisdomupeh@gmail.com",
+      "github_handle": "tech-with-upeh"
+    },
+    "cross_disciplinary_pairing": {
+      "discipline": "education",
+      "load_bearing": true,
+      "description": "Brief description of how your model serves a real-world domain."
+    },
+    "test_prompts": [
+      {
+        "prompt_id": "tp_001",
+        "prompt": "A farmer in Kaduna notices small, brown, water-soaked spots on their tomato leaves that are turning black. Based on these symptoms, what is the most likely disease, and what are 3 organic control methods they can use immediately?"
+      },
+      {
+        "prompt_id": "tp_002",
+        "prompt": "Act as an agricultural analyst. Look at these weekly market prices for a 100kg bag of white maize in Kano: Week 1: 45,000 NGN, Week 2: 46,200 NGN, Week 3: 44,800 NGN, Week 4: 47,500 NGN. Calculate the average price for the month and tell the farmer if the market trend is generally rising or falling."
+      }
+    ],
+    "model": {
+      "name": "Qwen2.5-1.5B-Instruct-GGUF",
+      "runtime": "llama.cpp",
+      "quantization": "GGUF Q4_K_M",
+      "parameters_estimate": "1.5B",
+      "packaging": "binary_bundle"
+    }
+  },
+  "environment": {
+    "measured_on": "participant_laptop",
+    "cpu_model": "AMD 3020e with Radeon Graphics",
+    "ram_gb": 6.7,
+    "gpu": "none",
+    "os": "Kali GNU/Linux Rolling"
+  },
+  "throughput": {
+    "tokens_per_second_generation": 5.6,
+    "first_token_latency_ms": 57850.0,
+    "prompt_tokens": 512,
+    "generated_tokens": 128
+  },
+  "memory": {
+    "peak_rss_mb": 1723.91,
+    "steady_state_rss_mb": 1610.22,
+    "peak_vms_mb": 2335.54
+  },
+  "accuracy": [],
+  "cpu_thermal": {
+    "cpu_percent_p99": 100.0,
+    "core_temp_c_peak": 5.0,
+    "throttled": false
+  },
+  "reproducibility": {
+    "git_commit_sha": "b5dc61e36e61",
+    "docker_image_digest": "unknown",
+    "random_seed": 42
+  },
+  "model_info": {
+    "params_count": null,
+    "context_length": 32768,
+    "architecture": "qwen2",
+    "claimed_params_estimate": "1.5B",
+    "params_match": true
+  }
+}
