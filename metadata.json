@@ -12,18 +12,18 @@
     "github_handle": "tech-with-upeh"
   },
   "cross_disciplinary_pairing": {
-    "discipline": "education",
+    "discipline": "Computer Vision + Retrieval-Augmented Generation",
     "load_bearing": true,
-    "description": "Brief description of how your model serves a real-world domain."
+    "description": "AgriSense fuses two disciplines into one offline pipeline: an ONNX vision model classifies crop diseases directly from a farmer's photo, and a local RAG layer (ChromaDB + nomic-embed-text) retrieves matching agronomic protocols from a structured knowledge base. The vision output and retrieved context are jointly injected into the LLM prompt, so the language model never diagnoses blind — every recommendation is grounded in both what the camera detected and what the knowledge base confirms. Neither discipline alone solves the problem: vision identifies the disease, RAG supplies the verified treatment, and the LLM translates both into plain-language, costed advice the farmer can act on immediately."
   },
   "test_prompts": [
     {
       "prompt_id": "tp_001",
-      "prompt": "A farmer in Kaduna notices small, brown, water-soaked spots on their tomato leaves that are turning black. Based on these symptoms, what is the most likely disease, and what are 3 organic control methods they can use immediately?"
+      "prompt": "Tomato leaves have small brown water-soaked spots turning black. Likely disease and 3 organic treatments?"
     },
     {
       "prompt_id": "tp_002",
-      "prompt": "Act as an agricultural analyst. Look at these weekly market prices for a 100kg bag of white maize in Kano: Week 1: 45,000 NGN, Week 2: 46,200 NGN, Week 3: 44,800 NGN, Week 4: 47,500 NGN. Calculate the average price for the month and tell the farmer if the market trend is generally rising or falling."
+      "prompt": "Maize prices in Kano this month: 45000, 46200, 44800, 47500 NGN per 100kg bag. What's the average and is the trend rising or falling?"
     }
   ],
   "model": {
